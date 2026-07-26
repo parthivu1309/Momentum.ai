@@ -13,6 +13,8 @@ import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api, API_BASE_URL } from '@/lib/api';
 
+import { useTasksData } from '@/hooks/useTasksData';
+
 const CATEGORIES = {
   health: { color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20', dot: 'bg-emerald-500' },
   work: { color: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20', dot: 'bg-indigo-500' },
@@ -22,16 +24,8 @@ const CATEGORIES = {
 
 type Category = keyof typeof CATEGORIES;
 
-const MOCK_TASKS = [
-  { id: 1, title: 'Morning Walk', startTime: '07:00', endTime: '08:00', repeat: 'daily', category: 'health' as Category },
-  { id: 2, title: 'Deep Work Session', startTime: '09:00', endTime: '11:30', repeat: 'daily', category: 'work' as Category },
-  { id: 3, title: 'Study DSA', startTime: '14:00', endTime: '15:30', repeat: 'weekdays', category: 'study' as Category },
-  { id: 4, title: 'Read 20 pages', startTime: '17:00', endTime: '18:00', repeat: 'daily', category: 'routine' as Category },
-  { id: 5, title: 'Gym Workout', startTime: '18:30', endTime: '19:30', repeat: 'mon-wed-fri', category: 'health' as Category },
-];
-
 export default function Timetable() {
-  const [tasks, setTasks] = useState(MOCK_TASKS);
+  const { tasks, isLoading, refetch } = useTasksData();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newTask, setNewTask] = useState({ title: '', startTime: '', endTime: '', repeat: 'daily', category: 'work' as Category });
 
@@ -63,17 +57,7 @@ export default function Timetable() {
       console.log("createTask() finished");
       console.log("Response:", createdTask);
 
-      const taskForUI = {
-        id: createdTask.id || Date.now(),
-        title: createdTask.title,
-        startTime: createdTask.startTime,
-        endTime: createdTask.endTime,
-        repeat: createdTask.repeatType || newTask.repeat,
-        category: createdTask.category || newTask.category
-      };
-
-      const updatedTasks = [...tasks, taskForUI].sort((a, b) => a.startTime.localeCompare(b.startTime));
-      setTasks(updatedTasks);
+      await refetch();
       setIsAddOpen(false);
       setNewTask({ title: '', startTime: '', endTime: '', repeat: 'daily', category: 'work' });
       toast.success("Task added to timetable successfully.");
@@ -87,9 +71,14 @@ export default function Timetable() {
     }
   };
 
-  const handleDeleteTask = (id: number) => {
-    setTasks(tasks.filter(t => t.id !== id));
-    toast.success("Task removed from timetable.");
+  const handleDeleteTask = async (id: string) => {
+    try {
+      await api.delete(`/tasks/${id}`);
+      await refetch();
+      toast.success("Task removed from timetable.");
+    } catch (err) {
+      toast.error("Failed to delete task.");
+    }
   };
 
   return (
@@ -224,13 +213,13 @@ export default function Timetable() {
 
                     {/* Timeline Node */}
                     <div className="relative pt-[22px] shrink-0">
-                      <div className={clsx("w-3 h-3 rounded-full ring-4 ring-background shadow-sm", CATEGORIES[task.category].dot)} />
+                      <div className={clsx("w-3 h-3 rounded-full ring-4 ring-background shadow-sm", CATEGORIES[task.category as Category]?.dot || 'bg-muted')} />
                     </div>
 
                     {/* Task Card */}
                     <Card className={clsx(
                       "flex-1 border bg-card transition-all duration-300 hover:shadow-premium-hover relative overflow-hidden",
-                      CATEGORIES[task.category].color
+                      CATEGORIES[task.category as Category]?.color || 'border-border'
                     )}>
                       {/* Subdued Category Background Overlay */}
                       <div className="absolute inset-0 bg-background/95 backdrop-blur-3xl -z-10" />
@@ -240,9 +229,24 @@ export default function Timetable() {
                           <div>
                             <div className="flex items-center gap-3 mb-1">
                               <h4 className="text-lg font-bold text-foreground">{task.title}</h4>
-                              <span className={clsx("px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border bg-background/50", CATEGORIES[task.category].color)}>
+                              <span className={clsx("px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border bg-background/50", CATEGORIES[task.category as Category]?.color || 'bg-muted text-muted-foreground')}>
                                 {task.category}
                               </span>
+                              {task.status === 'Completed' && (
+                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+                                  Completed
+                                </span>
+                              )}
+                              {task.status === 'Missed' && (
+                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border bg-destructive/10 text-destructive border-destructive/20">
+                                  Missed
+                                </span>
+                              )}
+                              {task.status === 'Snoozed' && (
+                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border bg-orange-500/10 text-orange-500 border-orange-500/20">
+                                  Snoozed
+                                </span>
+                              )}
                             </div>
                             
                             <div className="flex flex-wrap items-center text-xs font-medium text-muted-foreground gap-4 mt-2">
@@ -251,7 +255,7 @@ export default function Timetable() {
                                 {task.startTime} — {task.endTime}
                               </span>
                               <span className="capitalize px-2 py-1 bg-muted/50 rounded-md">
-                                {task.repeat.replace(/-/g, ' ')}
+                                {task.repeatType.replace(/-/g, ' ')}
                               </span>
                             </div>
                           </div>
