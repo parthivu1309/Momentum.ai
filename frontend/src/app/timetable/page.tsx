@@ -11,6 +11,7 @@ import { Plus, Clock, Edit2, Trash2, CalendarHeart } from 'lucide-react';
 import { toast } from 'sonner';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
+import { api, API_BASE_URL } from '@/lib/api';
 
 const CATEGORIES = {
   health: { color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20', dot: 'bg-emerald-500' },
@@ -34,22 +35,56 @@ export default function Timetable() {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newTask, setNewTask] = useState({ title: '', startTime: '', endTime: '', repeat: 'daily', category: 'work' as Category });
 
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
+    console.log("Create Task button clicked");
+    console.log("Form submitted");
+    console.log("FormData:", newTask);
+
     if (!newTask.title || !newTask.startTime || !newTask.endTime) {
       toast.error("Please fill in all required fields.");
       return;
     }
     
-    const task = {
-      id: Date.now(),
-      ...newTask
-    };
-    
-    const updatedTasks = [...tasks, task].sort((a, b) => a.startTime.localeCompare(b.startTime));
-    setTasks(updatedTasks);
-    setIsAddOpen(false);
-    setNewTask({ title: '', startTime: '', endTime: '', repeat: 'daily', category: 'work' });
-    toast.success("Task added to timetable successfully.");
+    try {
+      console.log("Calling createTask()");
+      console.log("API_BASE_URL:", API_BASE_URL);
+      
+      const payload = {
+        timetableId: 'default',
+        title: newTask.title,
+        startTime: newTask.startTime,
+        endTime: newTask.endTime,
+        repeatType: newTask.repeat,
+        category: newTask.category
+      };
+      
+      const createdTask = await api.post<any>('/tasks', payload);
+      
+      console.log("createTask() finished");
+      console.log("Response:", createdTask);
+
+      const taskForUI = {
+        id: createdTask.id || Date.now(),
+        title: createdTask.title,
+        startTime: createdTask.startTime,
+        endTime: createdTask.endTime,
+        repeat: createdTask.repeatType || newTask.repeat,
+        category: createdTask.category || newTask.category
+      };
+
+      const updatedTasks = [...tasks, taskForUI].sort((a, b) => a.startTime.localeCompare(b.startTime));
+      setTasks(updatedTasks);
+      setIsAddOpen(false);
+      setNewTask({ title: '', startTime: '', endTime: '', repeat: 'daily', category: 'work' });
+      toast.success("Task added to timetable successfully.");
+    } catch (error: any) {
+      console.error("URL: " + API_BASE_URL + "/tasks");
+      console.error("HTTP Method: POST");
+      console.error("Request Body:", newTask);
+      console.error("Response Status:", error?.status);
+      console.error("Response Body:", error?.data);
+      toast.error("Failed to create task");
+    }
   };
 
   const handleDeleteTask = (id: number) => {
