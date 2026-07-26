@@ -13,12 +13,13 @@ const reports_controller_1 = require("./reports.controller");
 const ai_report_service_1 = require("./ai-report.service");
 const tasks_module_1 = require("../tasks/tasks.module");
 const task_responses_module_1 = require("../task-responses/task-responses.module");
+const ai_module_1 = require("../ai/ai.module");
 let ReportsModule = class ReportsModule {
 };
 exports.ReportsModule = ReportsModule;
 exports.ReportsModule = ReportsModule = __decorate([
     (0, common_1.Module)({
-        imports: [tasks_module_1.TasksModule, task_responses_module_1.TaskResponsesModule],
+        imports: [tasks_module_1.TasksModule, task_responses_module_1.TaskResponsesModule, ai_module_1.AiModule],
         controllers: [reports_controller_1.ReportsController],
         providers: [reports_service_1.ReportsService, ai_report_service_1.AiReportService],
         exports: [reports_service_1.ReportsService, ai_report_service_1.AiReportService]

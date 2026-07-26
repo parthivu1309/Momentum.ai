@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { AnalyticsService } from '../analytics/analytics.service';
-import { AiService } from '../ai/ai.service';
+import { AiProviderService } from '../ai/ai-provider.service';
 import { ReportsService } from '../reports/reports.service';
 import { TasksService } from '../tasks/tasks.service';
 import { TelegramService } from '../telegram/telegram.service';
@@ -13,7 +13,7 @@ export class SchedulerService {
 
   constructor(
     private analyticsService: AnalyticsService,
-    private aiService: AiService,
+    private aiService: AiProviderService,
     private reportsService: ReportsService,
     private tasksService: TasksService,
     private telegramService: TelegramService,
@@ -80,7 +80,17 @@ export class SchedulerService {
       const dateStr = yesterday.toISOString().split('T')[0];
 
       const analytics = await this.analyticsService.calculateDailyMetrics(dateStr);
-      const aiSummary = await this.aiService.generateDailyCoaching(analytics);
+      const systemPrompt = `You are Momentum.AI, a tough but fair discipline coach.
+Based on the following daily analytics, generate a structured coaching response.
+Return a JSON object with:
+- summary: string (a short punchy summary of the day)
+- biggestAchievement: string
+- biggestWeakness: string
+- recommendation: string
+- motivation: string`;
+      const userPrompt = `Analytics:\n${JSON.stringify(analytics, null, 2)}`;
+      
+      const aiSummary = await this.aiService.generateJson(systemPrompt, userPrompt);
 
       await this.reportsService.create({
         type: 'daily',

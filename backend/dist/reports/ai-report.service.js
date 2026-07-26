@@ -12,32 +12,20 @@ var AiReportService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AiReportService = void 0;
 const common_1 = require("@nestjs/common");
-const config_1 = require("@nestjs/config");
-const genai_1 = require("@google/genai");
 const tasks_service_1 = require("../tasks/tasks.service");
 const task_responses_service_1 = require("../task-responses/task-responses.service");
+const ai_provider_service_1 = require("../ai/ai-provider.service");
 let AiReportService = AiReportService_1 = class AiReportService {
-    configService;
     tasksService;
     taskResponsesService;
-    ai = null;
+    aiProvider;
     logger = new common_1.Logger(AiReportService_1.name);
-    constructor(configService, tasksService, taskResponsesService) {
-        this.configService = configService;
+    constructor(tasksService, taskResponsesService, aiProvider) {
         this.tasksService = tasksService;
         this.taskResponsesService = taskResponsesService;
-        const apiKey = this.configService.get('GEMINI_API_KEY');
-        if (apiKey) {
-            this.ai = new genai_1.GoogleGenAI({ apiKey });
-        }
-        else {
-            this.logger.warn('GEMINI_API_KEY is not set. AI reports will fail.');
-        }
+        this.aiProvider = aiProvider;
     }
     async generateDailyReport() {
-        if (!this.ai) {
-            throw new Error('AI not configured (Missing GEMINI_API_KEY)');
-        }
         this.logger.log("Loading today's tasks...");
         const allTasks = await this.tasksService.findAll();
         const now = new Date();
@@ -91,13 +79,12 @@ let AiReportService = AiReportService_1 = class AiReportService {
             completionRate: Number(completionRate.toFixed(1)),
             tasks: tasksData
         };
-        this.logger.log('Generating prompt...');
-        const prompt = `
-You are an AI discipline coach.
-Analyse today's productivity.
-Write a concise report.
-Return ONLY markdown.
-
+        this.logger.log('Building report prompt...');
+        const systemPrompt = `You are an AI discipline coach.
+Analyse the user's productivity based only on the supplied data.
+Never invent facts.
+Return markdown only.`;
+        const userPrompt = `
 Include:
 # Daily Report
 ## Summary
@@ -116,26 +103,12 @@ Mention missed tasks.
 End with a short motivating paragraph.
 
 Keep the report under 400 words.
-Never hallucinate.
-Use only the supplied data.
 
 Data:
 ${JSON.stringify(reportData, null, 2)}
 `;
-        this.logger.log('Calling Gemini...');
         try {
-            const response = await this.ai.models.generateContent({
-                model: 'gemini-2.0-flash',
-                contents: prompt,
-            });
-            this.logger.log('Gemini success');
-            let reportMarkdown = response.text || '';
-            if (reportMarkdown.startsWith('```markdown')) {
-                reportMarkdown = reportMarkdown.replace(/^```markdown\n/, '').replace(/\n```$/, '');
-            }
-            else if (reportMarkdown.startsWith('```')) {
-                reportMarkdown = reportMarkdown.replace(/^```\n/, '').replace(/\n```$/, '');
-            }
+            const reportMarkdown = await this.aiProvider.generateMarkdown(systemPrompt, userPrompt);
             this.logger.log('Returning report');
             return {
                 report: reportMarkdown,
@@ -150,7 +123,7 @@ ${JSON.stringify(reportData, null, 2)}
             };
         }
         catch (error) {
-            this.logger.error('Gemini error:', error);
+            this.logger.error('Failed to generate AI report using Provider', error);
             throw new Error('Failed to generate AI report');
         }
     }
@@ -158,8 +131,8 @@ ${JSON.stringify(reportData, null, 2)}
 exports.AiReportService = AiReportService;
 exports.AiReportService = AiReportService = AiReportService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [config_1.ConfigService,
-        tasks_service_1.TasksService,
-        task_responses_service_1.TaskResponsesService])
+    __metadata("design:paramtypes", [tasks_service_1.TasksService,
+        task_responses_service_1.TaskResponsesService,
+        ai_provider_service_1.AiProviderService])
 ], AiReportService);
 //# sourceMappingURL=ai-report.service.js.map

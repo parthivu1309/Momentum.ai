@@ -1,12 +1,11 @@
-import { ConfigService } from '@nestjs/config';
 import { TasksService } from '../tasks/tasks.service';
 import { TaskResponsesService } from '../task-responses/task-responses.service';
+import { AiProviderService } from '../ai/ai-provider.service';
 export declare class AiReportService {
-    private configService;
     private tasksService;
     private taskResponsesService;
-    private ai;
+    private aiProvider;
     private readonly logger;
-    constructor(configService: ConfigService, tasksService: TasksService, taskResponsesService: TaskResponsesService);
+    constructor(tasksService: TasksService, taskResponsesService: TaskResponsesService, aiProvider: AiProviderService);
     generateDailyReport(): Promise<any>;
 }

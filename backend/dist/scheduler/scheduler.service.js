@@ -14,7 +14,7 @@ exports.SchedulerService = void 0;
 const common_1 = require("@nestjs/common");
 const schedule_1 = require("@nestjs/schedule");
 const analytics_service_1 = require("../analytics/analytics.service");
-const ai_service_1 = require("../ai/ai.service");
+const ai_provider_service_1 = require("../ai/ai-provider.service");
 const reports_service_1 = require("../reports/reports.service");
 const tasks_service_1 = require("../tasks/tasks.service");
 const telegram_service_1 = require("../telegram/telegram.service");
@@ -80,7 +80,16 @@ let SchedulerService = SchedulerService_1 = class SchedulerService {
             yesterday.setDate(yesterday.getDate() - 1);
             const dateStr = yesterday.toISOString().split('T')[0];
             const analytics = await this.analyticsService.calculateDailyMetrics(dateStr);
-            const aiSummary = await this.aiService.generateDailyCoaching(analytics);
+            const systemPrompt = `You are Momentum.AI, a tough but fair discipline coach.
+Based on the following daily analytics, generate a structured coaching response.
+Return a JSON object with:
+- summary: string (a short punchy summary of the day)
+- biggestAchievement: string
+- biggestWeakness: string
+- recommendation: string
+- motivation: string`;
+            const userPrompt = `Analytics:\n${JSON.stringify(analytics, null, 2)}`;
+            const aiSummary = await this.aiService.generateJson(systemPrompt, userPrompt);
             await this.reportsService.create({
                 type: 'daily',
                 date: dateStr,
@@ -110,7 +119,7 @@ __decorate([
 exports.SchedulerService = SchedulerService = SchedulerService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [analytics_service_1.AnalyticsService,
-        ai_service_1.AiService,
+        ai_provider_service_1.AiProviderService,
         reports_service_1.ReportsService,
         tasks_service_1.TasksService,
         telegram_service_1.TelegramService,

@@ -1,32 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { GoogleGenAI } from '@google/genai';
 import { TasksService } from '../tasks/tasks.service';
 import { TaskResponsesService } from '../task-responses/task-responses.service';
+import { AiProviderService } from '../ai/ai-provider.service';
 
 @Injectable()
 export class AiReportService {
-  private ai: GoogleGenAI | null = null;
   private readonly logger = new Logger(AiReportService.name);
 
   constructor(
-    private configService: ConfigService,
     private tasksService: TasksService,
     private taskResponsesService: TaskResponsesService,
-  ) {
-    const apiKey = this.configService.get<string>('GEMINI_API_KEY');
-    if (apiKey) {
-      this.ai = new GoogleGenAI({ apiKey });
-    } else {
-      this.logger.warn('GEMINI_API_KEY is not set. AI reports will fail.');
-    }
-  }
+    private aiProvider: AiProviderService
+  ) {}
 
   async generateDailyReport(): Promise<any> {
-    if (!this.ai) {
-      throw new Error('AI not configured (Missing GEMINI_API_KEY)');
-    }
-
     this.logger.log("Loading today's tasks...");
     const allTasks = await this.tasksService.findAll();
     
@@ -87,13 +74,13 @@ export class AiReportService {
       tasks: tasksData
     };
 
-    this.logger.log('Generating prompt...');
-    const prompt = `
-You are an AI discipline coach.
-Analyse today's productivity.
-Write a concise report.
-Return ONLY markdown.
+    this.logger.log('Building report prompt...');
+    const systemPrompt = `You are an AI discipline coach.
+Analyse the user's productivity based only on the supplied data.
+Never invent facts.
+Return markdown only.`;
 
+    const userPrompt = `
 Include:
 # Daily Report
 ## Summary
@@ -112,31 +99,15 @@ Mention missed tasks.
 End with a short motivating paragraph.
 
 Keep the report under 400 words.
-Never hallucinate.
-Use only the supplied data.
 
 Data:
 ${JSON.stringify(reportData, null, 2)}
 `;
 
-    this.logger.log('Calling Gemini...');
     try {
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-2.0-flash',
-        contents: prompt,
-      });
-
-      this.logger.log('Gemini success');
-      
-      // Clean up markdown block if it includes ```markdown
-      let reportMarkdown = response.text || '';
-      if (reportMarkdown.startsWith('```markdown')) {
-        reportMarkdown = reportMarkdown.replace(/^```markdown\n/, '').replace(/\n```$/, '');
-      } else if (reportMarkdown.startsWith('```')) {
-        reportMarkdown = reportMarkdown.replace(/^```\n/, '').replace(/\n```$/, '');
-      }
-
+      const reportMarkdown = await this.aiProvider.generateMarkdown(systemPrompt, userPrompt);
       this.logger.log('Returning report');
+      
       return {
         report: reportMarkdown,
         statistics: {
@@ -149,7 +120,7 @@ ${JSON.stringify(reportData, null, 2)}
         generatedAt: new Date().toISOString()
       };
     } catch (error) {
-      this.logger.error('Gemini error:', error);
+      this.logger.error('Failed to generate AI report using Provider', error);
       throw new Error('Failed to generate AI report');
     }
   }
