@@ -28,12 +28,18 @@ export class FirebaseService implements OnModuleInit {
             privateKey,
           }),
         });
+        try {
+          getFirestore(this.app).settings({ ignoreUndefinedProperties: true });
+        } catch (e) {}
         this.logger.log('Firebase Admin initialized successfully.');
       } catch (error) {
         this.logger.error('Failed to initialize Firebase Admin', error);
       }
     } else {
       this.app = getApp();
+      try {
+        getFirestore(this.app).settings({ ignoreUndefinedProperties: true });
+      } catch (e) {}
     }
   }
 
