@@ -1,35 +1,50 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileBarChart, BrainCircuit, TrendingUp, TrendingDown, CheckCircle2, AlertTriangle, ArrowRight } from 'lucide-react';
+import { FileBarChart, BrainCircuit, RefreshCw, AlertTriangle, ArrowRight, TrendingUp, TrendingDown, Target, Zap } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Button } from '@/components/ui/button';
+import { api } from '@/lib/api';
+import ReactMarkdown from 'react-markdown';
 
-const DAILY_REPORTS = [
-  { 
-    id: 1, 
-    date: 'Today, 25 Jul', 
-    completion: 67, 
-    trend: 'down',
-    title: 'Energy Dip',
-    insight: "Steady progress in the morning. However, you missed your afternoon session due to 'Low Energy'. Consider moving heavy analytical tasks before 2 PM.",
-    strengths: ['Morning Routine', 'Deep Work'],
-    weaknesses: ['Afternoon Slump'],
-  },
-  { 
-    id: 2, 
-    date: 'Yesterday, 24 Jul', 
-    completion: 91, 
-    trend: 'up',
-    title: 'Peak Performance',
-    insight: "Excellent consistency. Completing the morning workout led to a 100% completion rate for deep work. This pattern is highly effective.",
-    strengths: ['Exercise', 'Focus', 'Consistency'],
-    weaknesses: [],
-  }
-];
+interface DailyReport {
+  date: string;
+  report: string;
+  generatedAt: string;
+  statistics: {
+    completionRate: number;
+    completed: number;
+    missed: number;
+    snoozed: number;
+    scheduled: number;
+  };
+}
 
 export default function Reports() {
+  const [reportData, setReportData] = useState<DailyReport | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchDailyReport = async (refresh: boolean = false) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await api.get<DailyReport>(`/reports/daily${refresh ? '?refresh=true' : ''}`);
+      setReportData(data);
+    } catch (err: any) {
+      console.error('Failed to fetch daily report:', err);
+      setError('Could not generate the AI daily report. Ensure backend and Gemini API are configured properly.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDailyReport();
+  }, []);
+
   return (
     <div className="space-y-10 pb-20 animate-in fade-in slide-in-from-bottom-8 duration-700">
       
@@ -50,79 +65,94 @@ export default function Reports() {
         
         <TabsContent value="daily" className="mt-8">
           <div className="space-y-8 max-w-4xl">
-            {DAILY_REPORTS.map((report) => (
-              <Card key={report.id} className="card-premium overflow-hidden group">
+            <div className="flex justify-end">
+               <Button 
+                 variant="outline" 
+                 size="sm" 
+                 onClick={() => fetchDailyReport(true)}
+                 disabled={isLoading}
+                 className="rounded-full shadow-sm text-xs font-medium"
+               >
+                 <RefreshCw className={clsx("h-3.5 w-3.5 mr-2", isLoading && "animate-spin")} /> 
+                 Regenerate Report
+               </Button>
+            </div>
+
+            {isLoading && !reportData ? (
+              <Card className="card-premium overflow-hidden animate-pulse">
+                 <div className="h-1.5 w-full bg-muted" />
+                 <CardHeader className="pb-4 pt-6 px-6 md:px-8 space-y-4">
+                    <div className="h-4 bg-muted rounded w-1/4"></div>
+                    <div className="h-8 bg-muted rounded w-1/2"></div>
+                 </CardHeader>
+                 <CardContent className="px-6 md:px-8 pb-8 space-y-6">
+                    <div className="h-32 bg-muted rounded-xl w-full"></div>
+                    <div className="space-y-2">
+                       <div className="h-4 bg-muted rounded w-3/4"></div>
+                       <div className="h-4 bg-muted rounded w-5/6"></div>
+                       <div className="h-4 bg-muted rounded w-1/2"></div>
+                    </div>
+                 </CardContent>
+              </Card>
+            ) : error ? (
+              <Card className="border-destructive bg-destructive/5 text-destructive p-8 flex flex-col items-center justify-center text-center space-y-4 rounded-xl">
+                 <AlertTriangle className="h-10 w-10" />
+                 <div>
+                    <h3 className="font-bold text-lg">Report Generation Failed</h3>
+                    <p className="text-sm opacity-90 mt-1">{error}</p>
+                 </div>
+                 <Button variant="destructive" onClick={() => fetchDailyReport(false)} className="mt-2">Try Again</Button>
+              </Card>
+            ) : reportData ? (
+              <Card className="card-premium overflow-hidden group">
                 {/* Decorative Top Border */}
                 <div className={clsx(
                   "h-1.5 w-full",
-                  report.completion >= 80 ? "bg-success" : report.completion >= 60 ? "bg-warning" : "bg-destructive"
+                  reportData.statistics.completionRate >= 80 ? "bg-success" : reportData.statistics.completionRate >= 50 ? "bg-warning" : "bg-destructive"
                 )} />
                 
                 <CardHeader className="pb-4 pt-6 px-6 md:px-8">
-                  <div className="flex justify-between items-start">
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div className="space-y-1">
-                      <p className="text-sm font-bold tracking-wider uppercase text-muted-foreground">{report.date}</p>
-                      <h3 className="text-2xl font-bold text-foreground">{report.title}</h3>
+                      <p className="text-sm font-bold tracking-wider uppercase text-muted-foreground">{reportData.date}</p>
+                      <h3 className="text-2xl font-bold text-foreground">Daily AI Assessment</h3>
                     </div>
-                    <div className="flex flex-col items-end">
-                      <div className={clsx(
-                        "text-3xl font-bold flex items-center gap-2",
-                        report.completion >= 80 ? "text-success" : report.completion >= 60 ? "text-warning" : "text-destructive"
-                      )}>
-                        {report.completion}%
+                    <div className="flex gap-6 items-center">
+                      <div className="text-center">
+                         <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Scheduled</p>
+                         <p className="text-xl font-bold">{reportData.statistics.scheduled}</p>
                       </div>
-                      <div className="flex items-center gap-1 text-xs font-semibold text-muted-foreground mt-1">
-                        {report.trend === 'up' ? <TrendingUp className="h-3.5 w-3.5 text-success" /> : <TrendingDown className="h-3.5 w-3.5 text-destructive" />}
-                        {report.trend === 'up' ? 'Trending Up' : 'Trending Down'}
+                      <div className="text-center">
+                         <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Completed</p>
+                         <p className="text-xl font-bold text-success">{reportData.statistics.completed}</p>
+                      </div>
+                      <div className="text-center">
+                         <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Completion</p>
+                         <div className={clsx(
+                           "text-2xl font-bold flex items-center justify-center",
+                           reportData.statistics.completionRate >= 80 ? "text-success" : reportData.statistics.completionRate >= 50 ? "text-warning" : "text-destructive"
+                         )}>
+                           {reportData.statistics.completionRate}%
+                         </div>
                       </div>
                     </div>
                   </div>
                 </CardHeader>
 
-                <CardContent className="px-6 md:px-8 pb-8 space-y-8">
+                <CardContent className="px-6 md:px-8 pb-8">
                   {/* AI Insight Box */}
-                  <div className="bg-primary/5 rounded-xl p-5 md:p-6 border border-primary/10 relative">
-                    <div className="absolute -top-3 -left-3 w-8 h-8 bg-primary rounded-xl flex items-center justify-center shadow-sm rotate-[-6deg] group-hover:rotate-0 transition-transform">
-                      <BrainCircuit className="h-4 w-4 text-primary-foreground" />
+                  <div className="bg-primary/5 rounded-xl p-6 md:p-8 border border-primary/10 relative mt-4 shadow-sm">
+                    <div className="absolute -top-4 -left-4 w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-md rotate-[-6deg] group-hover:rotate-0 transition-transform duration-300">
+                      <BrainCircuit className="h-5 w-5 text-primary-foreground" />
                     </div>
-                    <p className="text-foreground leading-relaxed font-medium">
-                      "{report.insight}"
-                    </p>
-                  </div>
-
-                  {/* Attributes Grid */}
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-success" /> Key Strengths
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {report.strengths.map(s => (
-                          <span key={s} className="px-3 py-1.5 bg-success/10 text-success text-xs font-bold rounded-lg border border-success/20">
-                            {s}
-                          </span>
-                        ))}
-                      </div>
+                    <div className="prose prose-sm dark:prose-invert max-w-none text-foreground leading-relaxed font-medium">
+                       <ReactMarkdown>{reportData.report}</ReactMarkdown>
                     </div>
-
-                    {report.weaknesses.length > 0 && (
-                      <div className="space-y-3">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                          <AlertTriangle className="h-4 w-4 text-warning" /> Areas to Improve
-                        </h4>
-                        <div className="flex flex-wrap gap-2">
-                          {report.weaknesses.map(w => (
-                            <span key={w} className="px-3 py-1.5 bg-warning/10 text-warning-foreground text-xs font-bold rounded-lg border border-warning/20">
-                              {w}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </div>
+                  <p className="text-xs text-muted-foreground mt-4 text-right font-medium">Generated at {new Date(reportData.generatedAt).toLocaleTimeString()}</p>
                 </CardContent>
               </Card>
-            ))}
+            ) : null}
           </div>
         </TabsContent>
 

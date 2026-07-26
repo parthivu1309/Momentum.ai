@@ -17,6 +17,7 @@ exports.TaskResponsesModule = TaskResponsesModule = __decorate([
     (0, common_1.Module)({
         controllers: [task_responses_controller_1.TaskResponsesController],
         providers: [task_responses_service_1.TaskResponsesService],
+        exports: [task_responses_service_1.TaskResponsesService]
     })
 ], TaskResponsesModule);
 //# sourceMappingURL=task-responses.module.js.map

@@ -21,6 +21,10 @@ let ReportsController = class ReportsController {
     constructor(reportsService) {
         this.reportsService = reportsService;
     }
+    getDailyReport(refresh) {
+        const shouldRefresh = refresh === 'true';
+        return this.reportsService.getDailyReport(shouldRefresh);
+    }
     findAll(type) {
         return this.reportsService.findAll(type);
     }
@@ -29,6 +33,15 @@ let ReportsController = class ReportsController {
     }
 };
 exports.ReportsController = ReportsController;
+__decorate([
+    (0, common_1.Get)('daily'),
+    (0, swagger_1.ApiOperation)({ summary: "Get today's AI Daily Report" }),
+    (0, swagger_1.ApiQuery)({ name: 'refresh', required: false, type: Boolean }),
+    __param(0, (0, common_1.Query)('refresh')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ReportsController.prototype, "getDailyReport", null);
 __decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Get all reports' }),

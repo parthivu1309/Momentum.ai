@@ -8,16 +8,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var ReportsService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReportsService = void 0;
 const common_1 = require("@nestjs/common");
 const firebase_service_1 = require("../firebase/firebase.service");
-let ReportsService = class ReportsService {
+const ai_report_service_1 = require("./ai-report.service");
+let ReportsService = ReportsService_1 = class ReportsService {
     firebaseService;
+    aiReportService;
     collection = 'reports';
     userId = 'default-user';
-    constructor(firebaseService) {
+    logger = new common_1.Logger(ReportsService_1.name);
+    constructor(firebaseService, aiReportService) {
         this.firebaseService = firebaseService;
+        this.aiReportService = aiReportService;
     }
     async create(createReportDto) {
         const docRef = this.firebaseService.firestore.collection(this.collection).doc();
@@ -47,10 +52,40 @@ let ReportsService = class ReportsService {
         }
         return doc.data();
     }
+    async getDailyReport(refresh = false) {
+        const todayStr = new Date().toLocaleDateString('en-CA');
+        if (!refresh) {
+            this.logger.log(`Checking cache for daily report on ${todayStr}`);
+            const query = await this.firebaseService.firestore
+                .collection(this.collection)
+                .where('userId', '==', this.userId)
+                .where('type', '==', 'daily')
+                .where('date', '==', todayStr)
+                .get();
+            if (!query.empty) {
+                this.logger.log('Returning cached daily report');
+                return query.docs[0].data();
+            }
+        }
+        this.logger.log('Generating new daily AI report');
+        const aiData = await this.aiReportService.generateDailyReport();
+        const docRef = this.firebaseService.firestore.collection(this.collection).doc();
+        const report = {
+            id: docRef.id,
+            userId: this.userId,
+            type: 'daily',
+            date: todayStr,
+            ...aiData,
+            createdAt: new Date().toISOString(),
+        };
+        await docRef.set(report);
+        return report;
+    }
 };
 exports.ReportsService = ReportsService;
-exports.ReportsService = ReportsService = __decorate([
+exports.ReportsService = ReportsService = ReportsService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [firebase_service_1.FirebaseService])
+    __metadata("design:paramtypes", [firebase_service_1.FirebaseService,
+        ai_report_service_1.AiReportService])
 ], ReportsService);
 //# sourceMappingURL=reports.service.js.map

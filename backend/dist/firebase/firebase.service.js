@@ -38,6 +38,10 @@ let FirebaseService = FirebaseService_1 = class FirebaseService {
                         privateKey,
                     }),
                 });
+                try {
+                    (0, firestore_1.getFirestore)(this.app).settings({ ignoreUndefinedProperties: true });
+                }
+                catch (e) { }
                 this.logger.log('Firebase Admin initialized successfully.');
             }
             catch (error) {
@@ -46,6 +50,10 @@ let FirebaseService = FirebaseService_1 = class FirebaseService {
         }
         else {
             this.app = (0, app_1.getApp)();
+            try {
+                (0, firestore_1.getFirestore)(this.app).settings({ ignoreUndefinedProperties: true });
+            }
+            catch (e) { }
         }
     }
     get firestore() {

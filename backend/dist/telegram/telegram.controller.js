@@ -21,8 +21,8 @@ let TelegramController = class TelegramController {
     constructor(telegramService) {
         this.telegramService = telegramService;
     }
-    async handleWebhook(update) {
-        await this.telegramService.handleWebhook(update);
+    handleWebhook(update) {
+        this.telegramService.handleWebhook(update).catch(err => console.error('Unhandled webhook error:', err));
         return { ok: true };
     }
 };
@@ -33,7 +33,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
+    __metadata("design:returntype", void 0)
 ], TelegramController.prototype, "handleWebhook", null);
 exports.TelegramController = TelegramController = __decorate([
     (0, swagger_1.ApiTags)('Telegram'),

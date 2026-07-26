@@ -7,6 +7,14 @@ import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
+  @Get('daily')
+  @ApiOperation({ summary: "Get today's AI Daily Report" })
+  @ApiQuery({ name: 'refresh', required: false, type: Boolean })
+  getDailyReport(@Query('refresh') refresh?: string) {
+    const shouldRefresh = refresh === 'true';
+    return this.reportsService.getDailyReport(shouldRefresh);
+  }
+
   @Get()
   @ApiOperation({ summary: 'Get all reports' })
   @ApiQuery({ name: 'type', required: false })
