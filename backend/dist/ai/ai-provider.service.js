@@ -25,9 +25,18 @@ let AiProviderService = AiProviderService_1 = class AiProviderService {
     constructor(configService) {
         this.configService = configService;
         const apiKey = this.configService.get('DEEPSEEK_API_KEY');
-        const baseURL = this.configService.get('DEEPSEEK_BASE_URL', 'https://api.deepseek.com');
-        const model = this.configService.get('DEEPSEEK_MODEL', 'deepseek-chat');
+        this.logger.log('AI Provider: DeepSeek');
+        this.logger.log('Environment Variable Name: DEEPSEEK_API_KEY');
+        this.logger.log(`API Key Exists: ${!!apiKey}`);
         if (apiKey) {
+            this.logger.log(`Key Length: ${apiKey.length}`);
+            if (apiKey.length >= 8) {
+                const preview = `${apiKey.substring(0, 4)}${'*'.repeat(apiKey.length - 8)}${apiKey.substring(apiKey.length - 4)}`;
+                this.logger.log(`Preview: ${preview}`);
+            }
+            this.logger.log('AI Provider initialized successfully.');
+            const baseURL = this.configService.get('DEEPSEEK_BASE_URL', 'https://api.deepseek.com');
+            const model = this.configService.get('DEEPSEEK_MODEL', 'deepseek-chat');
             this.openai = new openai_1.default({
                 apiKey,
                 baseURL,
@@ -37,7 +46,8 @@ let AiProviderService = AiProviderService_1 = class AiProviderService {
             this.model = model;
         }
         else {
-            this.logger.warn('DEEPSEEK_API_KEY is not set. AI features will fail.');
+            this.logger.error('AI Provider initialization failed: Missing DEEPSEEK_API_KEY.');
+            throw new Error('AI Provider initialization failed: Missing DEEPSEEK_API_KEY.');
         }
     }
     async generateMarkdown(systemPrompt, userPrompt) {
