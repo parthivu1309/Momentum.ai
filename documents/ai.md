@@ -6,7 +6,7 @@
 
 **Current Provider:** Google Gemini
 
-**Future Providers:** OpenAI, Claude, OpenRouter, DeepSeek, Qwen
+**Future Providers:** OpenAI, Claude, OpenRouter, Grok (xAI), Qwen
 
 ---
 

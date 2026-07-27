@@ -168,7 +168,7 @@ Future Providers
 - OpenAI
 - Claude
 - OpenRouter
-- DeepSeek
+- Grok (xAI)
 - Qwen
 
 The AI provider can be replaced without affecting the rest of the system.
