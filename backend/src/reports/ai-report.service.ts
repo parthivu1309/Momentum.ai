@@ -119,9 +119,13 @@ ${JSON.stringify(reportData, null, 2)}
         },
         generatedAt: new Date().toISOString()
       };
-    } catch (error) {
-      this.logger.error('Failed to generate AI report using Provider', error);
-      throw new Error('Failed to generate AI report');
+    } catch (error: any) {
+      this.logger.error('Failed to generate AI report using Provider');
+      this.logger.error(`Original Error: ${error.message}`);
+      if (error.stack) {
+        this.logger.error(`Stack: ${error.stack}`);
+      }
+      throw error;
     }
   }
 }

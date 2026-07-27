@@ -38,34 +38,66 @@ export class AiProviderService {
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 seconds
+    const url = `${this.baseURL}/chat/completions`;
+
+    const requestBody = {
+      model: this.model,
+      temperature: 0.7,
+      ...payload
+    };
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${this.apiKey}`
+    };
+
+    const headersForLog = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer [REDACTED]'
+    };
+
+    this.logger.log('========== AI REQUEST ==========');
+    this.logger.log(`URL: ${url}`);
+    this.logger.log(`Model: ${this.model}`);
+    this.logger.log(`Headers: ${JSON.stringify(headersForLog)}`);
+    this.logger.log(`Request body: ${JSON.stringify(requestBody)}`);
+    this.logger.log('================================');
 
     try {
       this.logger.log(`Calling Grok (${this.model})...`);
-      const response = await fetch(`${this.baseURL}/chat/completions`, {
+      const response = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`
-        },
-        body: JSON.stringify({
-          model: this.model,
-          temperature: 0.7,
-          ...payload
-        }),
+        headers,
+        body: JSON.stringify(requestBody),
         signal: controller.signal
       });
 
       clearTimeout(timeoutId);
       this.logger.log('Grok response received');
+      
+      const responseHeaders: Record<string, string> = {};
+      response.headers.forEach((value, key) => {
+        responseHeaders[key] = value;
+      });
+
+      const rawResponseText = await response.text();
+      
+      this.logger.log('========== AI RESPONSE ==========');
+      this.logger.log(`Status code: ${response.status} ${response.statusText}`);
+      this.logger.log(`Headers: ${JSON.stringify(responseHeaders)}`);
+      this.logger.log(`Raw response text: ${rawResponseText}`);
+      
+      let data;
+      try {
+        data = JSON.parse(rawResponseText);
+        this.logger.log(`Parsed JSON: ${JSON.stringify(data)}`);
+      } catch (parseError) {
+        this.logger.log('Failed to parse response as JSON');
+      }
+      this.logger.log('=================================');
 
       if (!response.ok) {
-        let errorData: any = {};
-        try {
-          errorData = await response.json();
-        } catch {
-          errorData = { error: { message: response.statusText } };
-        }
-
+        let errorData = data || { error: { message: response.statusText } };
         const errorMessage = errorData.error?.message || response.statusText;
         
         switch (response.status) {
@@ -92,10 +124,8 @@ export class AiProviderService {
             this.logger.error(`Grok API Error: Service unavailable / Network failure (${response.status}) - ${errorMessage}`);
         }
         
-        throw new Error(`Grok API Error: ${response.status}`);
+        throw new Error(`Grok API Error: ${response.status} - ${errorMessage} - Raw: ${rawResponseText}`);
       }
-
-      const data = await response.json();
       
       if (!data.choices || data.choices.length === 0) {
         throw new Error('Empty response from Grok API');
@@ -107,11 +137,15 @@ export class AiProviderService {
         this.logger.error('Grok API Error: Timeout (30000ms exceeded)');
         throw new Error('Grok API Timeout');
       }
-      this.logger.error(`Grok API Error: ${error.message}`);
+      this.logger.error('========== AI ERROR ==========');
+      this.logger.error(`Original Error: ${error.message}`);
       if (error.stack) {
-        this.logger.error(error.stack);
+        this.logger.error(`Stack: ${error.stack}`);
       }
-      throw new Error('Failed to generate AI report');
+      this.logger.error('==============================');
+      
+      // Do not swallow exception
+      throw error;
     }
   }
 
