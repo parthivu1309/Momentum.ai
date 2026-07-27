@@ -28,13 +28,20 @@ let TelegramService = TelegramService_1 = class TelegramService {
         this.botToken = this.configService.get('TELEGRAM_BOT_TOKEN') || '';
     }
     async handleWebhook(update) {
-        this.logger.log('Webhook received');
+        this.logger.log('Webhook received in service');
         if (update.callback_query) {
             const callbackQuery = update.callback_query;
             const data = callbackQuery.data;
             const chatId = callbackQuery.message?.chat?.id;
             const messageId = callbackQuery.message?.message_id;
             const queryId = callbackQuery.id;
+            this.logger.log('========== CALLBACK QUERY DETAILS ==========');
+            this.logger.log(`update.callback_query exists`);
+            this.logger.log(`callback_query.data: ${data}`);
+            this.logger.log(`callback_query.id: ${queryId}`);
+            this.logger.log(`callback_query.message.message_id: ${messageId}`);
+            this.logger.log(`callback_query.message.chat.id: ${chatId}`);
+            this.logger.log('============================================');
             this.logger.log('Parsed callback_query');
             if (data && data.startsWith('action_')) {
                 this.logger.log('Extracting action and taskId');
@@ -114,12 +121,15 @@ let TelegramService = TelegramService_1 = class TelegramService {
             return false;
         try {
             const url = `https://api.telegram.org/bot${this.botToken}/answerCallbackQuery`;
+            const payload = { callback_query_id: callbackQueryId, text };
+            this.logger.log(`answerCallbackQuery request: ${JSON.stringify(payload)}`);
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ callback_query_id: callbackQueryId, text })
+                body: JSON.stringify(payload)
             });
             const data = await response.json();
+            this.logger.log(`answerCallbackQuery response: ${JSON.stringify(data)}`);
             if (!data.ok) {
                 throw new Error(`Telegram API Error: ${JSON.stringify(data)}`);
             }
@@ -135,12 +145,15 @@ let TelegramService = TelegramService_1 = class TelegramService {
             return false;
         try {
             const url = `https://api.telegram.org/bot${this.botToken}/editMessageText`;
+            const payload = { chat_id: chatId, message_id: messageId, text };
+            this.logger.log(`editMessageText request: ${JSON.stringify(payload)}`);
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id: chatId, message_id: messageId, text })
+                body: JSON.stringify(payload)
             });
             const data = await response.json();
+            this.logger.log(`editMessageText response: ${JSON.stringify(data)}`);
             if (!data.ok) {
                 throw new Error(`Telegram API Error: ${JSON.stringify(data)}`);
             }

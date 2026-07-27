@@ -1,7 +1,7 @@
 import { Controller, Post, Req, Logger } from '@nestjs/common';
 import { TelegramService } from './telegram.service';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
-import { Request } from 'express';
+import type { Request } from 'express';
 
 @ApiTags('Telegram')
 @Controller('telegram')

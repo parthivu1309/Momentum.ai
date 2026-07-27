@@ -11,18 +11,23 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var TelegramController_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TelegramController = void 0;
 const common_1 = require("@nestjs/common");
 const telegram_service_1 = require("./telegram.service");
 const swagger_1 = require("@nestjs/swagger");
-let TelegramController = class TelegramController {
+let TelegramController = TelegramController_1 = class TelegramController {
     telegramService;
+    logger = new common_1.Logger(TelegramController_1.name);
     constructor(telegramService) {
         this.telegramService = telegramService;
     }
-    handleWebhook(update) {
-        this.telegramService.handleWebhook(update).catch(err => console.error('Unhandled webhook error:', err));
+    handleWebhook(req) {
+        const update = req.body;
+        this.logger.log('========== WEBHOOK RECEIVED ==========');
+        this.logger.log(JSON.stringify(update, null, 2));
+        this.telegramService.handleWebhook(update).catch(err => this.logger.error('Unhandled webhook error:', err));
         return { ok: true };
     }
 };
@@ -30,12 +35,12 @@ exports.TelegramController = TelegramController;
 __decorate([
     (0, common_1.Post)('webhook'),
     (0, swagger_1.ApiOperation)({ summary: 'Telegram webhook receiver' }),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], TelegramController.prototype, "handleWebhook", null);
-exports.TelegramController = TelegramController = __decorate([
+exports.TelegramController = TelegramController = TelegramController_1 = __decorate([
     (0, swagger_1.ApiTags)('Telegram'),
     (0, common_1.Controller)('telegram'),
     __metadata("design:paramtypes", [telegram_service_1.TelegramService])

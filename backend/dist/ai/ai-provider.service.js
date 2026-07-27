@@ -77,13 +77,17 @@ let AiProviderService = AiProviderService_1 = class AiProviderService {
                         this.logger.error(`Grok API Error: Authentication failure (401)`);
                         break;
                     case 402:
-                        this.logger.error(`Grok API Error: Quota exceeded (402)`);
+                        this.logger.error(`Grok API Error: Quota exceeded / Insufficient Balance (402)`);
+                        break;
+                    case 403:
+                        this.logger.error(`Grok API Error: Permission Denied / Insufficient Balance (403) - ${errorMessage}`);
                         break;
                     case 429:
                         this.logger.error(`Grok API Error: Rate limits (429)`);
                         break;
                     case 400:
                         this.logger.error(`Grok API Error: Invalid Request (400) - ${errorMessage}`);
+                        this.logger.error(`Grok API Error Details: ${JSON.stringify(errorData)}`);
                         break;
                     case 404:
                         this.logger.error(`Grok API Error: Invalid model or endpoint (404) - ${errorMessage}`);
