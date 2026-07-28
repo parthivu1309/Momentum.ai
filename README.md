@@ -37,27 +37,6 @@ Scheduled task execution.
 REST API.
 AI service integration.
 Automatic report generation.
-🏗️ Architecture
-                    ┌──────────────────┐
-                    │     Frontend     │
-                    │   Next.js + TS   │
-                    └────────┬─────────┘
-                             │
-                       REST API
-                             │
-                    ┌────────▼────────┐
-                    │ NestJS Backend  │
-                    └────────┬────────┘
-                             │
-         ┌───────────────────┼───────────────────┐
-         │                   │                   │
-         ▼                   ▼                   ▼
-   Firestore DB      Telegram Bot        OpenRouter AI
-         │                   │                   │
-         └──────────────┬────┴───────────────────┘
-                        │
-                        ▼
-             Daily & Weekly Reports
 🛠 Tech Stack
 Frontend
 Next.js
