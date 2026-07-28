@@ -75,12 +75,12 @@ export class AiReportService {
     };
 
     this.logger.log('Building report prompt...');
-    const systemPrompt = `You are an AI discipline coach.
-Analyse the user's productivity based only on the supplied data.
-Never invent facts.
-Return markdown only.`;
 
     const userPrompt = `
+Analyse the user's productivity based only on the supplied data.
+Never invent facts.
+Return markdown only.
+
 Include:
 # Daily Report
 ## Summary
@@ -105,7 +105,7 @@ ${JSON.stringify(reportData, null, 2)}
 `;
 
     try {
-      const reportMarkdown = await this.aiProvider.generateMarkdown(systemPrompt, userPrompt);
+      const reportMarkdown = await this.aiProvider.generateMarkdown(userPrompt);
       this.logger.log('Returning report');
       
       return {

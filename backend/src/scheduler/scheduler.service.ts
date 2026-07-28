@@ -80,17 +80,18 @@ export class SchedulerService {
       const dateStr = yesterday.toISOString().split('T')[0];
 
       const analytics = await this.analyticsService.calculateDailyMetrics(dateStr);
-      const systemPrompt = `You are Momentum.AI, a tough but fair discipline coach.
-Based on the following daily analytics, generate a structured coaching response.
+      const userPrompt = `Based on the following daily analytics, generate a structured coaching response.
 Return a JSON object with:
 - summary: string (a short punchy summary of the day)
 - biggestAchievement: string
 - biggestWeakness: string
 - recommendation: string
-- motivation: string`;
-      const userPrompt = `Analytics:\n${JSON.stringify(analytics, null, 2)}`;
+- motivation: string
+
+Analytics:
+${JSON.stringify(analytics, null, 2)}`;
       
-      const aiSummary = await this.aiService.generateJson(systemPrompt, userPrompt);
+      const aiSummary = await this.aiService.generateJson(userPrompt);
 
       await this.reportsService.create({
         type: 'daily',

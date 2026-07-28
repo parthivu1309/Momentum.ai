@@ -80,11 +80,11 @@ let AiReportService = AiReportService_1 = class AiReportService {
             tasks: tasksData
         };
         this.logger.log('Building report prompt...');
-        const systemPrompt = `You are an AI discipline coach.
+        const userPrompt = `
 Analyse the user's productivity based only on the supplied data.
 Never invent facts.
-Return markdown only.`;
-        const userPrompt = `
+Return markdown only.
+
 Include:
 # Daily Report
 ## Summary
@@ -108,7 +108,7 @@ Data:
 ${JSON.stringify(reportData, null, 2)}
 `;
         try {
-            const reportMarkdown = await this.aiProvider.generateMarkdown(systemPrompt, userPrompt);
+            const reportMarkdown = await this.aiProvider.generateMarkdown(userPrompt);
             this.logger.log('Returning report');
             return {
                 report: reportMarkdown,
@@ -123,8 +123,12 @@ ${JSON.stringify(reportData, null, 2)}
             };
         }
         catch (error) {
-            this.logger.error('Failed to generate AI report using Provider', error);
-            throw new Error('Failed to generate AI report');
+            this.logger.error('Failed to generate AI report using Provider');
+            this.logger.error(`Original Error: ${error.message}`);
+            if (error.stack) {
+                this.logger.error(`Stack: ${error.stack}`);
+            }
+            throw error;
         }
     }
 };

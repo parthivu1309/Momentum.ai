@@ -6,7 +6,8 @@ export declare class AiProviderService {
     private baseURL;
     private model;
     constructor(configService: ConfigService);
-    private fetchGrok;
-    generateMarkdown(systemPrompt: string, userPrompt: string): Promise<string>;
-    generateJson(systemPrompt: string, userPrompt: string): Promise<any>;
+    getModel(): string;
+    private fetchAI;
+    generateMarkdown(userPrompt: string): Promise<string>;
+    generateJson(userPrompt: string): Promise<any>;
 }

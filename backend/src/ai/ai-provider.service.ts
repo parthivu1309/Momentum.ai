@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { SYSTEM_PROMPT } from './system-prompt';
 
 @Injectable()
 export class AiProviderService {
@@ -9,10 +10,10 @@ export class AiProviderService {
   private model: string;
 
   constructor(private configService: ConfigService) {
-    this.apiKey = this.configService.get<string>('GROK_API_KEY') || '';
+    this.apiKey = this.configService.get<string>('AI_API_KEY') || '';
     
-    this.logger.log('AI Provider: Grok');
-    this.logger.log('Environment Variable: GROK_API_KEY');
+    this.logger.log('AI Provider: OpenRouter');
+    this.logger.log('Environment Variable: AI_API_KEY');
     this.logger.log(`API Key Exists: ${!!this.apiKey}`);
     
     if (this.apiKey) {
@@ -23,15 +24,20 @@ export class AiProviderService {
       }
       this.logger.log('AI Provider initialized successfully.');
 
-      this.baseURL = this.configService.get<string>('GROK_BASE_URL', 'https://api.x.ai/v1');
-      this.model = this.configService.get<string>('GROK_MODEL', 'grok-2-latest');
+      this.baseURL = this.configService.get<string>('AI_BASE_URL', 'https://openrouter.ai/api/v1');
+      this.model = this.configService.get<string>('AI_MODEL', 'openai/gpt-4o');
     } else {
-      this.logger.error('AI Provider initialization failed: Missing GROK_API_KEY.');
-      throw new Error('AI Provider initialization failed: Missing GROK_API_KEY.');
+      this.logger.error('AI Provider initialization failed: Missing AI_API_KEY.');
+      throw new Error('AI Provider initialization failed: Missing AI_API_KEY.');
     }
   }
 
-  private async fetchGrok(payload: any): Promise<any> {
+  /** Expose model name for logging in controllers */
+  getModel(): string {
+    return this.model;
+  }
+
+  private async fetchAI(payload: any): Promise<any> {
     if (!this.apiKey) {
       throw new Error('AI Provider is not configured (Missing API Key)');
     }
@@ -43,17 +49,22 @@ export class AiProviderService {
     const requestBody = {
       model: this.model,
       temperature: 0.7,
+      max_tokens: 2048,
       ...payload
     };
 
-    const headers = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.apiKey}`
+      'Authorization': `Bearer ${this.apiKey}`,
+      'HTTP-Referer': 'http://localhost:3000',
+      'X-Title': 'Momentum AI'
     };
 
     const headersForLog = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer [REDACTED]'
+      'Authorization': 'Bearer [REDACTED]',
+      'HTTP-Referer': 'http://localhost:3000',
+      'X-Title': 'Momentum AI'
     };
 
     this.logger.log('========== AI REQUEST ==========');
@@ -64,7 +75,7 @@ export class AiProviderService {
     this.logger.log('================================');
 
     try {
-      this.logger.log(`Calling Grok (${this.model})...`);
+      this.logger.log(`Calling OpenRouter (${this.model})...`);
       const response = await fetch(url, {
         method: 'POST',
         headers,
@@ -73,7 +84,7 @@ export class AiProviderService {
       });
 
       clearTimeout(timeoutId);
-      this.logger.log('Grok response received');
+      this.logger.log('OpenRouter response received');
       
       const responseHeaders: Record<string, string> = {};
       response.headers.forEach((value, key) => {
@@ -100,42 +111,22 @@ export class AiProviderService {
         let errorData = data || { error: { message: response.statusText } };
         const errorMessage = errorData.error?.message || response.statusText;
         
-        switch (response.status) {
-          case 401:
-            this.logger.error(`Grok API Error: Authentication failure (401)`);
-            break;
-          case 402:
-            this.logger.error(`Grok API Error: Quota exceeded / Insufficient Balance (402)`);
-            break;
-          case 403:
-            this.logger.error(`Grok API Error: Permission Denied / Insufficient Balance (403) - ${errorMessage}`);
-            break;
-          case 429:
-            this.logger.error(`Grok API Error: Rate limits (429)`);
-            break;
-          case 400:
-            this.logger.error(`Grok API Error: Invalid Request (400) - ${errorMessage}`);
-            this.logger.error(`Grok API Error Details: ${JSON.stringify(errorData)}`);
-            break;
-          case 404:
-            this.logger.error(`Grok API Error: Invalid model or endpoint (404) - ${errorMessage}`);
-            break;
-          default:
-            this.logger.error(`Grok API Error: Service unavailable / Network failure (${response.status}) - ${errorMessage}`);
-        }
+        // Log full error body from OpenRouter
+        this.logger.error(`OpenRouter API Error (${response.status}): ${errorMessage}`);
+        this.logger.error(`OpenRouter Error Body: ${JSON.stringify(errorData)}`);
         
-        throw new Error(`Grok API Error: ${response.status} - ${errorMessage} - Raw: ${rawResponseText}`);
+        throw new Error(`OpenRouter API Error: ${response.status} - ${errorMessage} - Raw: ${rawResponseText}`);
       }
       
       if (!data.choices || data.choices.length === 0) {
-        throw new Error('Empty response from Grok API');
+        throw new Error('Empty response from OpenRouter API');
       }
 
       return data;
     } catch (error: any) {
       if (error.name === 'AbortError') {
-        this.logger.error('Grok API Error: Timeout (30000ms exceeded)');
-        throw new Error('Grok API Timeout');
+        this.logger.error('OpenRouter API Error: Timeout (30000ms exceeded)');
+        throw new Error('OpenRouter API Timeout');
       }
       this.logger.error('========== AI ERROR ==========');
       this.logger.error(`Original Error: ${error.message}`);
@@ -149,10 +140,10 @@ export class AiProviderService {
     }
   }
 
-  async generateMarkdown(systemPrompt: string, userPrompt: string): Promise<string> {
-    const data = await this.fetchGrok({
+  async generateMarkdown(userPrompt: string): Promise<string> {
+    const data = await this.fetchAI({
       messages: [
-        { role: 'system', content: systemPrompt },
+        { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: userPrompt }
       ]
     });
@@ -169,10 +160,10 @@ export class AiProviderService {
     return content;
   }
 
-  async generateJson(systemPrompt: string, userPrompt: string): Promise<any> {
-    const data = await this.fetchGrok({
+  async generateJson(userPrompt: string): Promise<any> {
+    const data = await this.fetchAI({
       messages: [
-        { role: 'system', content: systemPrompt },
+        { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: userPrompt }
       ],
       response_format: { type: 'json_object' }
@@ -184,7 +175,7 @@ export class AiProviderService {
     try {
       return JSON.parse(content);
     } catch (e) {
-      this.logger.error('Failed to parse JSON response from Grok');
+      this.logger.error('Failed to parse JSON response from OpenRouter');
       return {};
     }
   }
