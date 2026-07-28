@@ -1,67 +1,103 @@
-Momentum AI 🚀
+<div align="center">
+  <h1>🚀 Momentum AI</h1>
+  <p>
+    <b>An AI-powered discipline coach that transforms your daily routine into actionable insights through intelligent analysis, Telegram reminders, and behavioural reports.</b>
+  </p>
+  <p>
+    Momentum AI is not just another habit tracker. It is an <b>AI Behaviour Intelligence Platform</b> that helps users understand why they succeed or fail by analysing task completion patterns, productivity trends, and daily consistency.
+  </p>
+</div>
 
-An AI-powered discipline coach that transforms your daily routine into actionable insights through intelligent analysis, Telegram reminders, and behavioural reports.
+<hr />
 
-Momentum AI is not just another habit tracker. It is an AI Behaviour Intelligence Platform that helps users understand why they succeed or fail by analysing task completion patterns, productivity trends, and daily consistency.
+<h2>✨ Features</h2>
 
-✨ Features
-📅 Smart Task Scheduling
-Create daily schedules through a modern web interface.
-Support for recurring tasks.
-Flexible repeat options.
-Real-time task management.
-🤖 AI Behaviour Analysis
-AI-generated daily reports.
-AI-generated weekly reports.
-Behavioural pattern recognition.
-Evidence-based recommendations.
-Productivity analysis.
-Discipline scoring.
-📲 Telegram Integration
-Automatic task reminders.
-Interactive buttons:
-✅ Completed
-❌ Missed
-Instant response recording.
-Real-time progress tracking.
-📊 Analytics Dashboard
-Daily completion rate.
-Weekly performance.
-Discipline score.
-Completion statistics.
-Behaviour insights.
-AI-generated summaries.
-☁️ Cloud Backend
-Firestore database.
-Scheduled task execution.
-REST API.
-AI service integration.
-Automatic report generation.
-🛠 Tech Stack
-Frontend
-Next.js
-TypeScript
-Tailwind CSS
-React
-Axios
-Backend
-NestJS
-TypeScript
-Firebase Firestore
-Scheduler (Cron)
-OpenRouter AI API
-AI
-OpenRouter
-Markdown Report Generation
-JSON Analysis
-Custom Momentum AI System Prompt
-Notifications
-Telegram Bot API
-Deployment
-Frontend → Vercel
-Backend → Render
-Database → Firebase Firestore
-📸 Workflow
+<h3>📅 Smart Task Scheduling</h3>
+<ul>
+  <li>Create daily schedules through a modern web interface.</li>
+  <li>Support for recurring tasks.</li>
+  <li>Flexible repeat options.</li>
+  <li>Real-time task management.</li>
+</ul>
+
+<h3>🤖 AI Behaviour Analysis</h3>
+<ul>
+  <li>AI-generated daily reports.</li>
+  <li>AI-generated weekly reports.</li>
+  <li>Behavioural pattern recognition.</li>
+  <li>Evidence-based recommendations.</li>
+  <li>Productivity analysis.</li>
+  <li>Discipline scoring.</li>
+</ul>
+
+<h3>📲 Telegram Integration</h3>
+<ul>
+  <li>Automatic task reminders.</li>
+  <li>Interactive buttons:
+    <ul>
+      <li>✅ Completed</li>
+      <li>❌ Missed</li>
+    </ul>
+  </li>
+  <li>Instant response recording.</li>
+  <li>Real-time progress tracking.</li>
+</ul>
+
+<h3>📊 Analytics Dashboard</h3>
+<ul>
+  <li>Daily completion rate.</li>
+  <li>Weekly performance.</li>
+  <li>Discipline score.</li>
+  <li>Completion statistics.</li>
+  <li>Behaviour insights.</li>
+  <li>AI-generated summaries.</li>
+</ul>
+
+<h3>☁️ Cloud Backend</h3>
+<ul>
+  <li>Firestore database.</li>
+  <li>Scheduled task execution.</li>
+  <li>REST API.</li>
+  <li>AI service integration.</li>
+  <li>Automatic report generation.</li>
+</ul>
+
+<hr />
+
+<h2>🛠 Tech Stack</h2>
+
+<table>
+  <tr>
+    <th>Layer</th>
+    <th>Technologies</th>
+  </tr>
+  <tr>
+    <td><b>Frontend</b></td>
+    <td>Next.js, TypeScript, Tailwind CSS, React, Axios</td>
+  </tr>
+  <tr>
+    <td><b>Backend</b></td>
+    <td>NestJS, TypeScript, Firebase Firestore, Scheduler (Cron)</td>
+  </tr>
+  <tr>
+    <td><b>AI</b></td>
+    <td>OpenRouter, Markdown Report Generation, JSON Analysis, Custom System Prompt</td>
+  </tr>
+  <tr>
+    <td><b>Notifications</b></td>
+    <td>Telegram Bot API</td>
+  </tr>
+  <tr>
+    <td><b>Deployment</b></td>
+    <td>Vercel (Frontend), Render (Backend), Firebase Firestore (Database)</td>
+  </tr>
+</table>
+
+<hr />
+
+<h2>📸 Workflow</h2>
+
+<pre>
 Create Tasks
       │
       ▼
@@ -74,8 +110,7 @@ Scheduler Checks Every Minute
 Telegram Reminder
       │
       ▼
-User Clicks
-Completed / Missed
+User Clicks (Completed / Missed)
       │
       ▼
 Firestore Updates
@@ -85,24 +120,32 @@ AI Analyses Behaviour
       │
       ▼
 Daily / Weekly Report
-🧠 AI Capabilities
+</pre>
 
-Momentum AI analyses:
+<hr />
 
-Task completion
-Missed tasks
-Consistency
-Daily productivity
-Behaviour trends
-Habit strength
-Weakest routines
-Completion percentage
-Discipline score
-Personalised recommendations
+<h2>🧠 AI Capabilities</h2>
 
-Unlike traditional habit trackers, Momentum AI explains why progress is improving or declining instead of simply displaying statistics.
+<p>Momentum AI analyses:</p>
+<ul>
+  <li>Task completion</li>
+  <li>Missed tasks</li>
+  <li>Consistency</li>
+  <li>Daily productivity</li>
+  <li>Behaviour trends</li>
+  <li>Habit strength</li>
+  <li>Weakest routines</li>
+  <li>Completion percentage</li>
+  <li>Discipline score</li>
+  <li>Personalised recommendations</li>
+</ul>
+<p><i>Unlike traditional habit trackers, Momentum AI explains why progress is improving or declining instead of simply displaying statistics.</i></p>
 
-📂 Project Structure
+<hr />
+
+<h2>📂 Project Structure</h2>
+
+<pre>
 frontend/
 │
 ├── app/
@@ -123,101 +166,113 @@ backend/
 │   └── common/
 │
 └── ...
-⚙️ Environment Variables
-# OpenRouter
+</pre>
 
+<hr />
+
+<h2>⚙️ Environment Variables</h2>
+
+<pre><code># OpenRouter
 AI_API_KEY=
 AI_BASE_URL=https://openrouter.ai/api/v1
 AI_MODEL=
 
 # Firebase
-
 FIREBASE_PROJECT_ID=
 FIREBASE_PRIVATE_KEY=
 FIREBASE_CLIENT_EMAIL=
 
 # Telegram
-
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_CHAT_ID=
 
 # Backend
-
 PORT=3000
-🚀 Local Setup
-Clone
-git clone https://github.com/YOUR_USERNAME/momentum-ai.git
+</code></pre>
 
+<hr />
+
+<h2>🚀 Local Setup</h2>
+
+<h3>Clone</h3>
+<pre><code>git clone https://github.com/parthivu1309/Momentum.ai.git
 cd momentum-ai
-Backend
-cd backend
+</code></pre>
 
+<h3>Backend</h3>
+<pre><code>cd backend
 npm install
-
 npm run start:dev
-Frontend
-cd frontend
+</code></pre>
 
+<h3>Frontend</h3>
+<pre><code>cd frontend
 npm install
-
 npm run dev
-🧪 Example AI Report
-# Daily Discipline Report
+</code></pre>
 
-## Overview
+<hr />
 
-Scheduled Tasks: 13
+<h2>🧪 Example AI Report</h2>
 
-Completed: 10
+<blockquote>
+  <h3>Daily Discipline Report</h3>
 
-Missed: 3
+  <h4>Overview</h4>
+  <ul>
+    <li>Scheduled Tasks: 13</li>
+    <li>Completed: 10</li>
+    <li>Missed: 3</li>
+    <li>Completion Rate: 76.9%</li>
+    <li>Discipline Score: 82/100</li>
+  </ul>
 
-Completion Rate: 76.9%
+  <h4>Key Insights</h4>
+  <ul>
+    <li>Morning tasks show high consistency.</li>
+    <li>Reading habit declined over the past week.</li>
+    <li>Sleep schedule negatively impacts productivity.</li>
+  </ul>
 
-Discipline Score: 82/100
+  <h4>Recommendations</h4>
+  <ul>
+    <li>Move reading before dinner.</li>
+    <li>Sleep before 11 PM consistently.</li>
+    <li>Maintain your current morning routine.</li>
+  </ul>
+</blockquote>
 
-## Key Insights
+<hr />
 
-• Morning tasks show high consistency.
+<h2>🔮 Future Roadmap</h2>
+<ul>
+  <li>[ ] Streak tracking</li>
+  <li>[ ] Habit correlation analysis</li>
+  <li>[ ] Productivity heatmaps</li>
+  <li>[ ] Calendar integration (Google Calendar sync)</li>
+  <li>[ ] Multi-user support</li>
+  <li>[ ] Mobile application</li>
+  <li>[ ] Voice reminders</li>
+  <li>[ ] AI chat assistant</li>
+  <li>[ ] Monthly reports</li>
+  <li>[ ] Smart scheduling suggestions</li>
+  <li>[ ] Performance forecasting</li>
+</ul>
 
-• Reading habit declined over the past week.
+<hr />
 
-• Sleep schedule negatively impacts productivity.
+<h2>🤝 Contributing</h2>
+<p>Contributions, ideas, and feedback are always welcome.</p>
+<p>Feel free to fork the repository, open an issue, or submit a pull request.</p>
 
-## Recommendations
+<hr />
 
-• Move reading before dinner.
+<h2>⭐ Support</h2>
+<p>If you found this project helpful, please consider giving it a ⭐ <b>Star</b> on GitHub.</p>
+<p>It helps others discover the project and motivates future development.</p>
 
-• Sleep before 11 PM consistently.
+<hr />
 
-• Maintain your current morning routine.
-🔮 Future Roadmap
-Streak tracking
-Habit correlation analysis
-Productivity heatmaps
-Calendar integration
-Google Calendar sync
-Multi-user support
-Mobile application
-Voice reminders
-AI chat assistant
-Monthly reports
-Smart scheduling suggestions
-Performance forecasting
-🤝 Contributing
-
-Contributions, ideas, and feedback are always welcome.
-
-Feel free to fork the repository, open an issue, or submit a pull request.
-
-⭐ Support
-
-If you found this project helpful, please consider giving it a ⭐ Star on GitHub.
-
-It helps others discover the project and motivates future development.
-
-👨‍💻 Author
-
-Parthiv Upadhyay
-
-Built with ❤️ using Next.js, NestJS, Firebase, Telegram, and AI.
+<h2>👨‍💻 Author</h2>
+<p><b>Parthiv Upadhyay</b></p>
+<p>Built with ❤️ using Next.js, NestJS, Firebase, Telegram, and AI.</p>
