@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/Sidebar";
 import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from "@/components/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-sans",
@@ -28,24 +27,17 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
       suppressHydrationWarning
     >
       <body className="h-dvh flex bg-background text-foreground overflow-hidden">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Sidebar />
-          <main className="flex-1 min-w-0 overflow-y-auto bg-muted/30">
-            <div className="max-w-7xl mx-auto p-6 md:p-10 min-h-[calc(100vh-2rem)] flex flex-col">
-              {children}
-            </div>
-          </main>
-          <Toaster position="top-center" />
-        </ThemeProvider>
+        <Sidebar />
+        <main className="flex-1 min-w-0 overflow-y-auto bg-background">
+          <div className="max-w-7xl mx-auto p-6 md:p-10 min-h-[calc(100vh-2rem)] flex flex-col">
+            {children}
+          </div>
+        </main>
+        <Toaster position="top-center" theme="dark" />
       </body>
     </html>
   );

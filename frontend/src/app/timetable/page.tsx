@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Clock, Edit2, Trash2, CalendarHeart } from 'lucide-react';
+import { Plus, Clock, Edit2, Trash2, CalendarHeart, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -179,97 +179,121 @@ export default function Timetable() {
       </div>
 
       {/* Timeline Layout */}
-      <div className="max-w-4xl pt-4">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.1, duration: 0.5 }}
+        className="max-w-4xl pt-4"
+      >
         {tasks.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-6">
-              <CalendarHeart className="h-10 w-10 text-muted-foreground/50" />
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center justify-center py-24 text-center bg-card/50 rounded-3xl border border-border/50 shadow-sm"
+          >
+            <div className="w-20 h-20 bg-muted/50 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
+              <CalendarHeart className="h-10 w-10 text-muted-foreground/60" />
             </div>
-            <h3 className="text-xl font-bold">Your timeline is empty</h3>
-            <p className="text-muted-foreground mt-2 max-w-sm">
+            <h3 className="text-2xl font-bold text-foreground">Your timeline is empty</h3>
+            <p className="text-muted-foreground mt-3 max-w-md leading-relaxed">
               Start building your momentum by adding tasks and constructing your ideal day.
             </p>
-          </div>
+          </motion.div>
         ) : (
           <div className="relative">
             {/* Master Timeline Line */}
             <div className="absolute top-0 bottom-0 left-[68px] w-px bg-gradient-to-b from-transparent via-border to-transparent -z-10" />
 
-            <div className="space-y-6">
+            <div className="space-y-8">
               <AnimatePresence>
-                {tasks.map((task) => (
+                {tasks.map((task, index) => (
                   <motion.div 
                     key={task.id} 
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ delay: index * 0.05, type: "spring" as const, stiffness: 300, damping: 25 }}
                     className="group flex gap-8 relative items-start"
                   >
                     {/* Time Label (Sticky-like feel) */}
-                    <div className="w-12 pt-5 shrink-0 text-right">
-                      <p className="text-sm font-bold text-foreground">{task.startTime}</p>
+                    <div className="w-12 pt-6 shrink-0 text-right">
+                      <p className="text-[15px] font-bold text-muted-foreground group-hover:text-foreground transition-colors">{task.startTime}</p>
                     </div>
 
                     {/* Timeline Node */}
-                    <div className="relative pt-[22px] shrink-0">
-                      <div className={clsx("w-3 h-3 rounded-full ring-4 ring-background shadow-sm", CATEGORIES[task.category as Category]?.dot || 'bg-muted')} />
+                    <div className="relative pt-[26px] shrink-0 z-10">
+                      <div className={clsx(
+                        "w-3.5 h-3.5 rounded-full ring-4 ring-background shadow-sm transition-transform duration-300 group-hover:scale-125", 
+                        CATEGORIES[task.category as Category]?.dot || 'bg-muted'
+                      )} />
                     </div>
 
                     {/* Task Card */}
                     <Card className={clsx(
-                      "flex-1 border bg-card transition-all duration-300 hover:shadow-premium-hover relative overflow-hidden",
-                      CATEGORIES[task.category as Category]?.color || 'border-border'
+                      "flex-1 card-premium bg-card overflow-hidden relative shadow-sm hover:shadow-premium group",
+                      task.status === 'Completed' && "opacity-60 hover:opacity-100"
                     )}>
-                      {/* Subdued Category Background Overlay */}
-                      <div className="absolute inset-0 bg-background/95 backdrop-blur-3xl -z-10" />
+                      {/* Left Colored Accent Bar */}
+                      <div className={clsx(
+                        "absolute left-0 top-0 bottom-0 w-1.5 transition-all duration-300",
+                        CATEGORIES[task.category as Category]?.dot || 'bg-border',
+                        task.status === 'Completed' ? "opacity-50" : "group-hover:w-2"
+                      )} />
                       
-                      <CardContent className="p-5">
-                        <div className="flex justify-between items-start gap-4">
-                          <div>
-                            <div className="flex items-center gap-3 mb-1">
-                              <h4 className="text-lg font-bold text-foreground">{task.title}</h4>
-                              <span className={clsx("px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border bg-background/50", CATEGORIES[task.category as Category]?.color || 'bg-muted text-muted-foreground')}>
+                      {/* Subdued Category Background Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent to-background/50 -z-10" />
+                      
+                      <CardContent className="p-6 pl-8">
+                        <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h4 className={clsx(
+                                "text-lg font-bold tracking-tight transition-colors",
+                                task.status === 'Completed' ? "text-muted-foreground line-through" : "text-foreground"
+                              )}>
+                                {task.title}
+                              </h4>
+                              <span className={clsx(
+                                "px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest border transition-colors", 
+                                CATEGORIES[task.category as Category]?.color || 'bg-muted text-muted-foreground'
+                              )}>
                                 {task.category}
                               </span>
+                              
+                              {/* Status Badges */}
                               {task.status === 'Completed' && (
-                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
-                                  Completed
+                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-success/10 text-success border border-success/20 flex items-center gap-1">
+                                  <CheckCircle2 className="w-3 h-3" /> Done
                                 </span>
                               )}
                               {task.status === 'Missed' && (
-                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border bg-destructive/10 text-destructive border-destructive/20">
+                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-destructive/10 text-destructive border border-destructive/20">
                                   Missed
-                                </span>
-                              )}
-                              {task.status === 'Snoozed' && (
-                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border bg-orange-500/10 text-orange-500 border-orange-500/20">
-                                  Snoozed
                                 </span>
                               )}
                             </div>
                             
-                            <div className="flex flex-wrap items-center text-xs font-medium text-muted-foreground gap-4 mt-2">
-                              <span className="flex items-center gap-1.5 bg-muted/50 px-2 py-1 rounded-md">
+                            <div className="flex flex-wrap items-center text-xs font-semibold text-muted-foreground gap-3 mt-3">
+                              <span className="flex items-center gap-1.5 bg-muted/40 px-2.5 py-1 rounded-md text-foreground">
                                 <Clock className="h-3.5 w-3.5"/> 
                                 {task.startTime} — {task.endTime}
                               </span>
-                              <span className="capitalize px-2 py-1 bg-muted/50 rounded-md">
+                              <span className="capitalize px-2.5 py-1 bg-muted/40 rounded-md border border-border/50 text-foreground">
                                 {task.repeatType.replace(/-/g, ' ')}
                               </span>
                             </div>
                           </div>
                           
                           {/* Actions */}
-                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                          <div className="flex gap-1.5 md:opacity-0 md:group-hover:opacity-100 transition-opacity mt-4 md:mt-0">
+                            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground shadow-sm">
                               <Edit2 className="h-4 w-4" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="icon" 
                               onClick={() => handleDeleteTask(task.id)}
-                              className="h-8 w-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                              className="h-9 w-9 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive shadow-sm"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -283,7 +307,7 @@ export default function Timetable() {
             </div>
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

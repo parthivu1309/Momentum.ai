@@ -104,54 +104,69 @@ export default function Reports() {
                  <Button variant="destructive" onClick={() => fetchDailyReport(false)} className="mt-2">Try Again</Button>
               </Card>
             ) : reportData ? (
-              <Card className="card-premium overflow-hidden group">
-                {/* Decorative Top Border */}
-                <div className={clsx(
-                  "h-1.5 w-full",
-                  reportData.statistics.completionRate >= 80 ? "bg-success" : reportData.statistics.completionRate >= 50 ? "bg-warning" : "bg-destructive"
-                )} />
-                
-                <CardHeader className="pb-4 pt-6 px-6 md:px-8">
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div className="space-y-1">
-                      <p className="text-sm font-bold tracking-wider uppercase text-muted-foreground">{reportData.date}</p>
-                      <h3 className="text-2xl font-bold text-foreground">Daily AI Assessment</h3>
-                    </div>
-                    <div className="flex gap-6 items-center">
-                      <div className="text-center">
-                         <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Scheduled</p>
-                         <p className="text-xl font-bold">{reportData.statistics.scheduled}</p>
+              <div className="space-y-6">
+                <Card className="card-premium overflow-hidden group">
+                  <div className={clsx(
+                    "h-1.5 w-full",
+                    reportData.statistics.completionRate >= 80 ? "bg-success" : reportData.statistics.completionRate >= 50 ? "bg-warning" : "bg-destructive"
+                  )} />
+                  
+                  <CardHeader className="pb-4 pt-6 px-6 md:px-8">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                      <div className="space-y-1">
+                        <p className="text-sm font-bold tracking-wider uppercase text-muted-foreground">{reportData.date}</p>
+                        <h3 className="text-2xl font-bold text-foreground">Daily AI Assessment</h3>
                       </div>
-                      <div className="text-center">
-                         <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Completed</p>
-                         <p className="text-xl font-bold text-success">{reportData.statistics.completed}</p>
+                      <div className="flex gap-8 items-center bg-muted/30 px-6 py-4 rounded-2xl border border-border/50">
+                        <div className="text-center">
+                           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">Scheduled</p>
+                           <p className="text-xl font-bold">{reportData.statistics.scheduled}</p>
+                        </div>
+                        <div className="w-px h-8 bg-border" />
+                        <div className="text-center">
+                           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">Completed</p>
+                           <p className="text-xl font-bold text-success">{reportData.statistics.completed}</p>
+                        </div>
+                        <div className="w-px h-8 bg-border" />
+                        <div className="text-center">
+                           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">Score</p>
+                           <div className={clsx(
+                             "text-2xl font-bold flex items-center justify-center",
+                             reportData.statistics.completionRate >= 80 ? "text-success" : reportData.statistics.completionRate >= 50 ? "text-warning" : "text-destructive"
+                           )}>
+                             {reportData.statistics.completionRate}%
+                           </div>
+                        </div>
                       </div>
-                      <div className="text-center">
-                         <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Completion</p>
-                         <div className={clsx(
-                           "text-2xl font-bold flex items-center justify-center",
-                           reportData.statistics.completionRate >= 80 ? "text-success" : reportData.statistics.completionRate >= 50 ? "text-warning" : "text-destructive"
-                         )}>
-                           {reportData.statistics.completionRate}%
-                         </div>
+                    </div>
+                  </CardHeader>
+  
+                  <CardContent className="px-6 md:px-8 pb-8">
+                    <div className="bg-primary/5 rounded-2xl p-6 md:p-8 border border-primary/20 relative mt-6 shadow-sm flex flex-col md:flex-row gap-6 items-start">
+                      <div className="shrink-0 pt-1">
+                        <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-premium relative">
+                          <BrainCircuit className="h-6 w-6 text-primary-foreground" />
+                          <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-success border-2 border-background rounded-full" />
+                        </div>
+                      </div>
+                      <div className="flex-1 space-y-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="text-sm font-bold text-primary tracking-widest uppercase">Momentum Coach</h4>
+                          <span className="text-[10px] text-muted-foreground bg-background px-2 py-0.5 rounded-full border">AI Generated</span>
+                        </div>
+                        <div className="prose prose-sm dark:prose-invert max-w-none text-foreground/90 leading-relaxed font-medium text-[15px]">
+                           <ReactMarkdown>{reportData.report}</ReactMarkdown>
+                        </div>
+                        <div className="pt-4 border-t border-primary/10 flex justify-end">
+                          <p className="text-xs text-muted-foreground font-semibold flex items-center gap-1.5">
+                            <Zap className="h-3.5 w-3.5 text-warning" /> Analyzed at {new Date(reportData.generatedAt).toLocaleTimeString()}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </CardHeader>
-
-                <CardContent className="px-6 md:px-8 pb-8">
-                  {/* AI Insight Box */}
-                  <div className="bg-primary/5 rounded-xl p-6 md:p-8 border border-primary/10 relative mt-4 shadow-sm">
-                    <div className="absolute -top-4 -left-4 w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-md rotate-[-6deg] group-hover:rotate-0 transition-transform duration-300">
-                      <BrainCircuit className="h-5 w-5 text-primary-foreground" />
-                    </div>
-                    <div className="prose prose-sm dark:prose-invert max-w-none text-foreground leading-relaxed font-medium">
-                       <ReactMarkdown>{reportData.report}</ReactMarkdown>
-                    </div>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-4 text-right font-medium">Generated at {new Date(reportData.generatedAt).toLocaleTimeString()}</p>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
             ) : null}
           </div>
         </TabsContent>
