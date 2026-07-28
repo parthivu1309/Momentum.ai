@@ -97,7 +97,7 @@ export default function Dashboard() {
       <motion.div variants={itemVariants} className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pt-4">
         <div className="space-y-3">
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground flex items-center gap-3">
-            {greeting}, Developer <span className="animate-pulse">👋</span>
+            {greeting}, Parthiv <span className="animate-pulse">👋</span>
           </h2>
           <div className="flex flex-col gap-1">
             <p className="text-lg font-medium text-foreground">

@@ -139,7 +139,7 @@ export function Sidebar() {
               exit={{ opacity: 0 }}
               className="text-sm overflow-hidden whitespace-nowrap flex-1"
             >
-              <p className="font-semibold text-foreground text-[13px]">Developer</p>
+              <p className="font-semibold text-foreground text-[13px]">Parthiv</p>
               <p className="text-[11px] text-muted-foreground font-medium">Personal Mode</p>
             </motion.div>
           )}
